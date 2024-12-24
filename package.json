@@ -1,5 +1,5 @@
 {
-  "name": "ancient-tskit",
+  "name": "serenade-tskit",
   "version": "1.0.1",
   "description": "typescript utils",
   "main": "dist/index.js",
