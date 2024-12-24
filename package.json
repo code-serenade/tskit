@@ -1,0 +1,32 @@
+{
+  "name": "@code-serenade/tskit",
+  "version": "1.0.0",
+  "description": "typescript utils",
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "prepare": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/code-serenade/tskit.git"
+  },
+  "keywords": [
+    "typescript",
+    "utils"
+  ],
+  "author": "Ancient",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/code-serenade/tskit/issues"
+  },
+  "homepage": "https://github.com/code-serenade/tskit#readme",
+  "dependencies": {
+    "tslib": "^2.8.1",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2"
+  }
+}
