@@ -1,8 +1,8 @@
 import { exportToExcel, importFromExcel } from "./table_utils/excelUtils";
 
-var TableUtils = {
+const tableUtils = {
   exportToExcel,
   importFromExcel,
 };
 
-export { TableUtils };
+export { tableUtils };
