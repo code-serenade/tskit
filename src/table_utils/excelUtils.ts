@@ -22,62 +22,63 @@ export function exportToExcel(data: any[], fileName: string): void {
 }
 
 /**
- * Imports data from an Excel file (.xlsx) selected via an <input type="file"> element.
+ * Imports data from an Excel file and maps rows to objects using the header row.
  *
- * @returns {Promise<any[]>} A promise that resolves to an array of objects,
- *                           where each object represents a row of data from the Excel file.
- *
- * @throws {Error} If no file is selected or the file fails to load.
+ * @template T - The shape of the object each row will be mapped to.
+ * @param {File} file - The Excel file to import.
+ * @returns {Promise<T[]>} A promise that resolves to an array of objects representing the Excel data.
  *
  * @example
- * // HTML:
- * // <input type="file" id="fileInput" />
- *
- * importFromExcel().then(data => {
+ * interface User {
+ *   name: string;
+ *   age: number;
+ * }
+ * const file = new File([...], "example.xlsx");
+ * importFromExcel<User>(file).then(data => {
  *   console.log(data);
- * }).catch(error => {
- *   console.error(error);
  * });
- *
- * @remarks
- * This function relies on a hidden <input type="file"> element in the DOM to get the file.
- * Ensure the input element is present and accessible in the document.
  */
-export function importFromExcel(): Promise<any[]> {
+export function importFromExcel<T = Record<string, any>>(
+  file: File
+): Promise<T[]> {
   return new Promise((resolve, reject) => {
-    const fileInput = document.querySelector(
-      'input[type="file"]'
-    ) as HTMLInputElement;
-    const file = fileInput?.files?.[0];
-
     if (!file) {
-      reject("No file selected");
+      reject("No file provided");
       return;
     }
 
     const reader = new FileReader();
     reader.onload = (event: any) => {
-      const data = new Uint8Array(event.target.result);
-      const workbook = XLSX.read(data, { type: "array" });
-      const firstSheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[firstSheetName];
+      try {
+        const data = new Uint8Array(event.target.result);
+        const workbook = XLSX.read(data, { type: "array" });
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
 
-      const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-      const headers: string[] = jsonData[0] as string[];
-      const dataRows: any[][] = (jsonData as any[][]).slice(1);
+        // Convert worksheet to JSON
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        const headers: string[] = jsonData[0] as string[];
+        const dataRows: any[][] = (jsonData as any[][]).slice(1);
 
-      const formattedData = dataRows.map((row: any[]) => {
-        return row.reduce((acc: any, cell: any, index: number) => {
-          acc[headers[index]] = cell;
-          return acc;
-        }, {});
-      });
+        // Map rows to objects using headers
+        const formattedData = dataRows.map((row: any[]) => {
+          return row.reduce(
+            (acc: Record<string, any>, cell: any, index: number) => {
+              acc[headers[index]] = cell;
+              return acc;
+            },
+            {}
+          ) as T;
+        });
 
-      resolve(formattedData);
+        resolve(formattedData);
+      } catch (error) {
+        reject(`Error processing the file: ${(error as Error).message}`);
+      }
     };
 
     reader.onerror = (error) => {
-      reject(error);
+      reject(`File read error: ${error.target?.error?.message}`);
     };
 
     reader.readAsArrayBuffer(file);
